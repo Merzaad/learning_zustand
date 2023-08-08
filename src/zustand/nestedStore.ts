@@ -8,28 +8,67 @@ interface item {
 interface nestedStore {
   list: {
     data: item[] | []
-    status: { loading: boolean; loaded: boolean }
+    status: {
+      fetching: { fetched: boolean; error: { isError: boolean } }
+      loading: boolean
+    }
   }
-  setList: (list: item[]) => void
+  setData: (list: item[]) => void
+  setFetched: (fetched: boolean) => void
+  setLoading: (loading: boolean) => void
+  setError: (isError: boolean) => void
+}
+const list = {
+  data: [],
+  status: {
+    fetching: {
+      fetched: false,
+      error: {
+        isError: false,
+      },
+    },
+    loading: false,
+  },
 }
 const useNestedStore = create<nestedStore>((set) => ({
-  list: {
-    data: [],
-    status: { loading: false, loaded: false },
-  },
+  list,
   /*   setList: (list) => {
     set((state) => ({ list: { ...state.list, data: list } }))
   }, */
-  setList: (list) => {
+  setData: (list) => {
     set((state) =>
       produce(state, (draftState) => {
         draftState.list.data = list
       })
     )
   },
+  setFetched: (fetched) => {
+    set(
+      produce((draftState) => {
+        draftState.list.status.fetching.fetched = fetched
+      })
+    )
+  },
+  setLoading: (loading) => {
+    set(
+      produce((draftState) => {
+        draftState.list.status.loading = loading
+      })
+    )
+  },
+  setError: (isError) => {
+    set(
+      produce((draftState) => {
+        draftState.list.status.fetching.error.isError = isError
+      })
+    )
+  },
 }))
 
 const selectList = (state: nestedStore) => state.list
-const setList = (state: nestedStore) => state.setList
+const setData = (state: nestedStore) => state.setData
+const setFetched = (state: nestedStore) => state.setFetched
+const setLoading = (state: nestedStore) => state.setLoading
+const setError = (state: nestedStore) => state.setError
 
-export { useNestedStore, selectList, setList }
+export { useNestedStore, selectList, setData, setFetched, setLoading, setError }

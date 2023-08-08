@@ -2,13 +2,24 @@ import { useEffect } from 'react'
 import Box from '../components/Box'
 import Button from '../components/Button'
 import { select, useFlatStore, increase } from '../zustand/flatStore'
-import { selectList, setList, useNestedStore } from '../zustand/nestedStore'
+import {
+  selectList,
+  setData,
+  setFetched,
+  useNestedStore,
+  setLoading,
+  setError,
+} from '../zustand/nestedStore'
 
 export default function Home() {
   const count = useFlatStore(select)
   const increaseCount = useFlatStore(increase)
   const nested = useNestedStore(selectList)
-  const setNested = useNestedStore(setList)
+  const setNested = useNestedStore(setData)
+  const setNestedFetched = useNestedStore(setFetched)
+  const setNestedLoading = useNestedStore(setLoading)
+  const setNestedError = useNestedStore(setError)
+
   const fetchList = async () => {
     const data = await (() =>
       new Promise<
@@ -32,12 +43,17 @@ export default function Home() {
       }))()
     setNested(data)
   }
-  const resetList = () => setNested([])
   useEffect(() => {
-    console.log('status')
-  }, [nested.status])
+    console.log('fetched')
+  }, [nested.status.fetching.fetched])
   useEffect(() => {
-    console.log('list')
+    console.log('error')
+  }, [nested.status.fetching.error])
+  useEffect(() => {
+    console.log('loading')
+  }, [nested.status.loading])
+  useEffect(() => {
+    console.log('data')
   }, [nested.data])
   return (
     <div className='p-4 bg-zinc-800 flex gap-4 flex-col items-center'>
@@ -50,7 +66,9 @@ export default function Home() {
           <div key={i.id}>{i.text}</div>
         ))}
         <Button onClick={fetchList}>fetch</Button>
-        <Button onClick={resetList}>reset</Button>
+        <Button onClick={() => setNestedFetched(true)}>set fetched</Button>
+        <Button onClick={() => setNestedLoading(true)}>set loading</Button>
+        <Button onClick={() => setNestedError(true)}>set error</Button>
       </Box>
     </div>
   )
